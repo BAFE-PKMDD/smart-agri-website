@@ -30,12 +30,12 @@ export default function Header() {
           <Image
             src="/logo.png"
             alt="Smart Agriculture Logo"
-            width={44}
-            height={44}
+            width={50}
+            height={50}
             className="header__logo"
           />
           <div className="header__title">
-            Smart Agriculture
+            BAFE Smart Agriculture
             <span>Instrumentation &amp; Electronics</span>
           </div>
         </a>

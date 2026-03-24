@@ -17,6 +17,10 @@ export default function GroupDetailPage({ params }) {
   const [deleting, setDeleting] = useState(false);
   const [deletingUploadId, setDeletingUploadId] = useState(null);
   const [activeModule, setActiveModule] = useState(null);
+  const [memberNames, setMemberNames] = useState("");
+  const [description, setDescription] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const fetchGroup = useCallback(async () => {
     try {
@@ -24,6 +28,8 @@ export default function GroupDetailPage({ params }) {
       if (res.ok) {
         const data = await res.json();
         setGroup(data);
+        setMemberNames(data.memberNames || "");
+        setDescription(data.description || "");
       }
     } catch (error) {
       console.error("Failed to fetch group:", error);
@@ -35,6 +41,29 @@ export default function GroupDetailPage({ params }) {
   useEffect(() => {
     fetchGroup();
   }, [fetchGroup]);
+
+  const handleSaveInfo = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/groups/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ memberNames, description }),
+      });
+      if (res.ok) {
+        setEditing(false);
+        fetchGroup();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to save");
+      }
+    } catch (error) {
+      console.error("Error saving group info:", error);
+      alert("Failed to save group info");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleDelete = async () => {
     const confirmed = window.confirm(
@@ -109,6 +138,10 @@ export default function GroupDetailPage({ params }) {
   const uploadsForModule = (slug) =>
     group.uploads?.filter((u) => u.moduleSlug === slug) || [];
 
+  const hasInfoChanged =
+    memberNames !== (group.memberNames || "") ||
+    description !== (group.description || "");
+
   return (
     <div className="groups-page">
       <header className="groups-page__header">
@@ -143,35 +176,116 @@ export default function GroupDetailPage({ params }) {
                 </div>
               )}
             </div>
-            <div>
+            <div className="group-detail__hero-info">
               <h1 className="groups-page__title">{group.name}</h1>
               <p className="groups-page__subtitle">
                 Created by {group.createdBy?.name || "Unknown"} •{" "}
                 {group.uploads?.length || 0} uploads
               </p>
+              {group.memberNames && !editing && (
+                <p className="group-detail__inline-meta">
+                  <strong>Members:</strong> {group.memberNames}
+                </p>
+              )}
+              {group.description && !editing && (
+                <p className="group-detail__inline-meta">
+                  <strong>Description:</strong> {group.description}
+                </p>
+              )}
             </div>
-            {isCreator && (
-              <button
-                className="group-detail__delete-btn"
-                onClick={handleDelete}
-                disabled={deleting}
-                title="Delete this group"
-                type="button"
-              >
-                {deleting ? (
-                  <span className="group-detail__delete-spinner" />
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="3 6 5 6 21 6" />
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                    <line x1="10" y1="11" x2="10" y2="17" />
-                    <line x1="14" y1="11" x2="14" y2="17" />
+            <div className="group-detail__hero-actions">
+              {isCreator && !editing && (
+                <button
+                  className="group-detail__edit-btn"
+                  onClick={() => setEditing(true)}
+                  type="button"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                   </svg>
-                )}
-                {deleting ? "Deleting..." : "Delete Group"}
-              </button>
-            )}
+                  Edit Info
+                </button>
+              )}
+              {isCreator && (
+                <button
+                  className="group-detail__delete-btn"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  title="Delete this group"
+                  type="button"
+                >
+                  {deleting ? (
+                    <span className="group-detail__delete-spinner" />
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      <line x1="10" y1="11" x2="10" y2="17" />
+                      <line x1="14" y1="11" x2="14" y2="17" />
+                    </svg>
+                  )}
+                  {deleting ? "Deleting..." : "Delete Group"}
+                </button>
+              )}
+            </div>
           </div>
+
+          {/* Group Info Edit Form (only when editing or no data yet) */}
+          {isCreator && (editing || (!group.memberNames && !group.description)) && (
+            <div className="group-detail__info-section">
+              <div className="group-detail__info-field">
+                <label htmlFor="group-members" className="group-detail__info-label">
+                  Member Names
+                  <span className="group-detail__info-hint">Separate names with a comma</span>
+                </label>
+                <input
+                  id="group-members"
+                  type="text"
+                  className="group-detail__info-input"
+                  placeholder="e.g. Juan, Maria, Carlos"
+                  value={memberNames}
+                  onChange={(e) => setMemberNames(e.target.value)}
+                />
+              </div>
+              <div className="group-detail__info-field">
+                <label htmlFor="group-desc" className="group-detail__info-label">
+                  Group Description
+                </label>
+                <textarea
+                  id="group-desc"
+                  className="group-detail__info-input group-detail__info-textarea"
+                  placeholder="What is your group about?"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div className="group-detail__info-actions">
+                <button
+                  className="group-detail__save-btn"
+                  onClick={handleSaveInfo}
+                  disabled={saving}
+                  type="button"
+                >
+                  {saving ? "Saving..." : "Save Changes"}
+                </button>
+                {editing && (
+                  <button
+                    className="group-detail__cancel-btn"
+                    onClick={() => {
+                      setEditing(false);
+                      setMemberNames(group.memberNames || "");
+                      setDescription(group.description || "");
+                    }}
+                    type="button"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Module Grid */}
           <h2 className="group-detail__section-title">Module Uploads</h2>

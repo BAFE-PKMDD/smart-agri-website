@@ -62,6 +62,8 @@ export const verification = pgTable("verification", {
 export const group = pgTable("group", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
+  description: text("description"),
+  memberNames: text("member_names"),
   imageUrl: text("image_url"),
   createdById: text("created_by_id")
     .notNull()

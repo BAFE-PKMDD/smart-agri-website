@@ -48,6 +48,59 @@ export async function GET(request, { params }) {
   }
 }
 
+export async function PATCH(request, { params }) {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+
+    const existing = await db.query.group.findFirst({
+      where: eq(group.id, id),
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Group not found" }, { status: 404 });
+    }
+
+    if (existing.createdById !== session.user.id) {
+      return NextResponse.json(
+        { error: "Only the group creator can edit this group" },
+        { status: 403 }
+      );
+    }
+
+    const body = await request.json();
+    const updates = {};
+
+    if (typeof body.description === "string") {
+      updates.description = body.description || null;
+    }
+    if (typeof body.memberNames === "string") {
+      updates.memberNames = body.memberNames || null;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
+    }
+
+    await db.update(group).set(updates).where(eq(group.id, id));
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error updating group:", error);
+    return NextResponse.json(
+      { error: "Failed to update group" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(request, { params }) {
   try {
     const session = await auth.api.getSession({

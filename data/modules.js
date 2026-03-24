@@ -69,87 +69,74 @@ export const MODULE_DATA = [
   {
     slug: "blink-led",
     id: "II",
-    title: "Blink LED",
-    subtitle: "Your First Program — Controlling an LED with Digital Output",
-    tags: ["LED", "Digital Output"],
+    title: "Blinking an LED with ESP32",
+    subtitle: "Configure the Arduino IDE, Wire your First Circuit, and Upload a Sketch",
+    tags: ["LED", "Digital Output", "ESP32"],
     description:
-      "Your first program — controlling an LED with digital output, understanding pin configurations and timing.",
+      "Configure the Arduino IDE for the ESP32 board, write a basic sketch, and upload it to control an external LED.",
     sections: [
       {
-        heading: "Part I. Preparing the Arduino IDE",
+        heading: "Part I. Understanding the Components",
         content: [
-          "Before writing any code, we must tell the Arduino IDE which specific board we are programming for.",
+          "To build this circuit, you will need the following parts:",
+          "- **ESP32 Development Board** (30 or 38 pins).",
+          "- **LED (Light Emitting Diode):** Has a long leg (Anode/+) and a short leg (Cathode/-).",
+          "- **220Ω Resistor:** Limits the current flowing to the LED to prevent it from burning out.",
+          "- **Breadboard & Jumper Wires:** For making temporary connections.",
+        ],
+      },
+      {
+        heading: "Part II. Installing the ESP32 Board Package in Arduino IDE",
+        images: ["board-manager.png"],
+        content: [
           "**Procedures:**",
-          "1. Open the Arduino IDE.",
-          "2. Go to **Tools > Board > esp32 > ESP32 Dev Module**.",
-          "3. Connect your ESP32 to your laptop using the Micro USB cable.",
-          "4. Go to **Tools > Port** and select the port that appears (e.g., COM3 on Windows or /dev/ttyUSB0 on Linux).",
+          "1. Click the **Board Manager** icon on the left sidebar (looks like a small circuit board).",
+          "2. In the search bar, type **ESP32**.",
+          "3. Find the entry titled **esp32 by Espressif Systems** and click **Install**. Wait for the progress bar to finish; this downloads the compilers and tools needed for the ESP32 chip.",
         ],
       },
       {
-        heading: "Part II. Understanding the Built-in LED",
+        heading: "Part III. Hardware Assembly (The Circuit)",
+        images: ["led-circuit.png"],
         content: [
-          "Every ESP32 Dev Module has a tiny blue LED soldered directly onto the board, connected to **GPIO Pin 2**. This means we can make it blink without any external wiring.",
+          "**Procedures:**",
+          "1. Place the ESP32 board onto the breadboard.",
+          "2. Connect the **short leg (Cathode)** of the LED to a **Ground (GND)** pin on the ESP32 using a jumper wire.",
+          "3. Connect the **long leg (Anode)** of the LED to one end of the **220Ω resistor**.",
+          "4. Connect the other end of the resistor to **GPIO 13** (labeled D13 or G13) on the ESP32.",
+          "**Note:** We use a resistor because the ESP32 outputs 3.3V, which is high enough to damage a standard LED if connected directly.",
         ],
       },
       {
-        heading: "Part III. The Implementation Code",
-        images: ["image23.png"],
-        code: `// Module II: Blinking the Built-in LED
-// Target Board: ESP32 Dev Module
-
-// 1. Define the pin number for the built-in LED
-const int ledPin = 2;
+        heading: "Part IV. Writing the Blink Code",
+        content: [
+          "**Procedures:**",
+          "1. Open your Arduino IDE.",
+          "2. Connect your ESP32 board to your computer via a **USB-C data cable**.",
+          "3. Select your board: Go to **Toolbar > Select Board > ESP32 DEV MODULE**.",
+          "4. Clear any existing code in the editor and paste the following \"Blink\" script.",
+        ],
+        code: `// Define the LED pin
+const int ledPin = 13;
 
 void setup() {
-  // 2. Set the LED pin as an OUTPUT
+  // Initialize the digital pin as an output
   pinMode(ledPin, OUTPUT);
 }
 
 void loop() {
-  // 3. Turn the LED ON (HIGH voltage level)
-  digitalWrite(ledPin, HIGH);
-  delay(1000);                // Wait for 1 second
-
-  // 4. Turn the LED OFF (LOW voltage level)
-  digitalWrite(ledPin, LOW);
+  digitalWrite(ledPin, HIGH); // Turn the LED ON
+  delay(1000);                // Wait for 1000 milliseconds (1 second)
+  digitalWrite(ledPin, LOW);  // Turn the LED OFF (0V)
   delay(1000);                // Wait for 1 second
 }`,
       },
       {
-        heading: "Part IV. External LED Setup",
-        images: ["image17.png", "image15.png"],
+        heading: "Part V. Compiling and Uploading",
         content: [
-          "Now we add an external LED to learn physical wiring.",
           "**Procedures:**",
-          "1. Connect the **Long leg (Anode, +)** of the LED to one end of a **220Ω Resistor**.",
-          "2. Connect the other end of the resistor to **GPIO 5** on the ESP32.",
-          "3. Connect the **Short leg (Cathode, -)** of the LED to a **GND** pin on the ESP32.",
-        ],
-      },
-      {
-        heading: "Part V. Updated Code for External LED",
-        code: `// Module II (Extended): External LED on GPIO 5
-
-const int externalLedPin = 5;
-
-void setup() {
-  pinMode(externalLedPin, OUTPUT);
-}
-
-void loop() {
-  digitalWrite(externalLedPin, HIGH);
-  delay(1000);                // Wait for 1 second
-
-  digitalWrite(externalLedPin, LOW);
-  delay(1000);                // Wait for 1 second
-}`,
-      },
-      {
-        heading: "Part VI. Compiling and Uploading",
-        content: [
           "1. Click the **Upload** button (the right-pointing arrow) in the top toolbar.",
-          '2. **The "Boot" Button Trick:** If you see a message saying `Connecting......._____......`, press and hold the **BOOT** button on your physical ESP32 board until the upload starts.',
+          '2. **The "Boot" Button Trick:** If you see a message saying `Connecting......._____......`, press and hold the **BOOT** button on your physical ESP32 board until the upload starts (you will see percentage numbers).',
           '3. Once the console displays "Done uploading," your external LED should begin to pulse.',
         ],
       },
@@ -471,16 +458,18 @@ void loop() {
       },
       {
         heading: "Part II. Library Installation",
+        images: ["mod7-inst-1.png", "mod7-inst-2.png"],
         content: [
-          "1. In Arduino IDE, click the **Library Manager** icon (Ctrl+Shift+I).",
-          '2. Search for **"DHT sensor library"** by Adafruit.',
-          "3. Click **Install**.",
-          '4. When prompted, install the dependency **"Adafruit Unified Sensor"** as well.',
+          "To talk to the sensor, we need specific instructions (libraries).",
+          "**Procedures:**",
+          "1. In Arduino IDE, click the **Library Manager** icon on the left sidebar (shortcut: `Ctrl+Shift+I`).",
+          '2. Search for **"DHT sensor library"**. Find the one by **Adafruit** and click **Install**.',
+          '3. A popup may ask to install "Dependencies" (like *Adafruit Unified Sensor*). Click **Install All**.',
         ],
       },
       {
         heading: "Part III. Hardware Assembly",
-        images: ["image43.png"],
+        images: ["mod7-board.png"],
         content: [
           "1. Connect the **VCC** pin (Pin 1) of the DHT22 to **3V3** on the ESP32.",
           "2. Connect the **DATA** pin (Pin 2) to **GPIO 4** on the ESP32.",

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import LoginButton from "@/components/login-button";
 
 const NAV_ITEMS = [
   { label: "About", href: "#about" },
@@ -9,6 +11,7 @@ const NAV_ITEMS = [
   { label: "Schedule", href: "#schedule" },
   { label: "Details", href: "#details" },
   { label: "Assessments", href: "#assessments" },
+  { label: "Groups", href: "/groups", isPage: true },
   { label: "Contact", href: "#contact" },
 ];
 
@@ -42,16 +45,28 @@ export default function Header() {
         </a>
 
         <nav className={`nav ${menuOpen ? "nav--open" : ""}`} id="nav-menu">
-          {NAV_ITEMS.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="nav__link"
-              onClick={handleNavClick}
-            >
-              {item.label}
-            </a>
-          ))}
+          {NAV_ITEMS.map((item) =>
+            item.isPage ? (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="nav__link"
+                onClick={handleNavClick}
+              >
+                {item.label}
+              </Link>
+            ) : (
+              <a
+                key={item.href}
+                href={item.href}
+                className="nav__link"
+                onClick={handleNavClick}
+              >
+                {item.label}
+              </a>
+            )
+          )}
+          <LoginButton />
         </nav>
 
         <button

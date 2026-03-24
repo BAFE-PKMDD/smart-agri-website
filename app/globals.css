@@ -505,21 +505,82 @@ h1, h2, h3, h4, h5, h6 {
 
 .hero__logo-ring {
   position: absolute;
-  border: 2px dashed var(--color-primary-pale);
   border-radius: 50%;
-  animation: rotate-slow 40s linear infinite;
 }
 
 .hero__logo-ring--outer {
   width: 100%;
   height: 100%;
+  border: 2px dashed rgba(46, 125, 50, 0.2);
+  animation: rotate-slow 50s linear infinite;
 }
 
 .hero__logo-ring--inner {
-  width: 80%;
-  height: 80%;
-  animation-direction: reverse;
-  animation-duration: 30s;
+  width: 75%;
+  height: 75%;
+  border: 2px dashed rgba(46, 125, 50, 0.15);
+  animation: rotate-slow 35s linear infinite reverse;
+}
+
+/* Orbiting icon rings */
+.hero__orbit {
+  position: absolute;
+  border-radius: 50%;
+  border: 2.5px solid rgba(46, 125, 50, 0.18);
+}
+
+.hero__orbit--outer {
+  width: 100%;
+  height: 100%;
+  animation: rotate-slow 30s linear infinite;
+}
+
+.hero__orbit--inner {
+  width: 75%;
+  height: 75%;
+  animation: rotate-slow 22s linear infinite reverse;
+}
+
+.hero__orbit-icon {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  background-color: var(--color-bg-card);
+  border: 2px solid var(--color-primary-pale);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.12);
+  top: 50%;
+  left: 50%;
+  margin: -19px 0 0 -19px;
+  /* Position on orbit using --angle, translateY moves to radius edge */
+  transform:
+    rotate(var(--angle))
+    translateY(-210px)
+    rotate(calc(-1 * var(--angle)));
+}
+
+.hero__orbit--inner .hero__orbit-icon {
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  transform:
+    rotate(var(--angle))
+    translateY(-157px)
+    rotate(calc(-1 * var(--angle)));
+}
+
+.hero__orbit-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.hero__orbit--inner .hero__orbit-icon svg {
+  width: 16px;
+  height: 16px;
 }
 
 @keyframes rotate-slow {
@@ -528,12 +589,19 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .hero__logo-img {
-  width: 60%;
-  height: 60%;
+  width: 48%;
+  height: 48%;
   object-fit: contain;
-  border-radius: var(--radius-lg);
+  border-radius: 50%;
   position: relative;
   z-index: 1;
+  animation: float 6s ease-in-out infinite;
+  background-color: var(--color-bg-card);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 /* =========================================

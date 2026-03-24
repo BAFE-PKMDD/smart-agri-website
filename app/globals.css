@@ -271,6 +271,68 @@ h1, h2, h3, h4, h5, h6 {
   width: 100%;
 }
 
+/* Nav Dropdowns */
+.nav__dropdown {
+  position: relative;
+}
+
+.nav__dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.nav__dropdown-chevron {
+  transition: transform var(--transition-fast);
+}
+
+.nav__dropdown--open .nav__dropdown-chevron {
+  transform: rotate(180deg);
+}
+
+.nav__dropdown-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  min-width: 180px;
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  padding: var(--space-sm) 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  z-index: 200;
+}
+
+.nav__dropdown--open .nav__dropdown-menu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.nav__dropdown-item {
+  display: block;
+  padding: var(--space-sm) var(--space-lg);
+  font-family: var(--font-heading);
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.nav__dropdown-item:hover {
+  background-color: var(--color-primary-ghost);
+  color: var(--color-primary);
+}
+
 .nav__toggle {
   display: none;
   background: none;
@@ -1330,6 +1392,29 @@ a.module-card {
 
   .nav__toggle {
     display: flex;
+  }
+
+  .nav__dropdown-menu {
+    position: static;
+    transform: none;
+    box-shadow: none;
+    border: none;
+    background-color: transparent;
+    min-width: 0;
+    padding: 0;
+    padding-left: var(--space-lg);
+    border-left: 2px solid var(--color-primary-pale);
+    margin-top: var(--space-xs);
+    display: none;
+  }
+
+  .nav__dropdown--open .nav__dropdown-menu {
+    display: block;
+    transform: none;
+  }
+
+  .nav__dropdown-item {
+    padding: var(--space-xs) var(--space-md);
   }
 
   .section {

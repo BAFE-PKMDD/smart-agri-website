@@ -1184,6 +1184,140 @@ a.module-card {
   }
 }
 /* =========================================
+   Arduino Download Section
+   ========================================= */
+
+.arduino-dl {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.arduino-dl__steps {
+  margin-bottom: var(--space-2xl);
+}
+
+.arduino-dl__steps-title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--color-text);
+  margin-bottom: var(--space-lg);
+}
+
+.arduino-dl__steps-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  counter-reset: none;
+}
+
+.arduino-dl__steps-list li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  font-size: 0.92rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.arduino-dl__step-num {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-radius: 50%;
+}
+
+.arduino-dl__platforms {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-lg);
+  margin-bottom: var(--space-2xl);
+}
+
+.arduino-dl__card {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  text-align: center;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.arduino-dl__card:hover {
+  border-color: var(--color-primary-pale);
+  box-shadow: 0 4px 16px rgba(46, 125, 50, 0.08);
+}
+
+.arduino-dl__card-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary-ghost);
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+}
+
+.arduino-dl__card-platform {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-md);
+}
+
+.arduino-dl__card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-heading);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  transition: color var(--transition-fast);
+}
+
+.arduino-dl__card-link:hover {
+  color: var(--color-primary-light);
+}
+
+.arduino-dl__main-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-2xl);
+  background-color: var(--color-primary);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: var(--radius-full);
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.arduino-dl__main-btn:hover {
+  background-color: var(--color-primary-light);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .arduino-dl__platforms {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================
    Places to Visit Section
    ========================================= */
 

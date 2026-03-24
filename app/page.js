@@ -4,6 +4,7 @@ import About from "@/components/about";
 import Modules from "@/components/modules";
 import Schedule from "@/components/schedule";
 import TrainingDetails from "@/components/training-details";
+import ArduinoDownload from "@/components/arduino-download";
 import Outcomes from "@/components/outcomes";
 import Assessments from "@/components/assessments";
 import PlacesToVisit from "@/components/places-to-visit";
@@ -21,6 +22,7 @@ export default function Home() {
         <Modules />
         <Schedule />
         <TrainingDetails />
+        <ArduinoDownload />
         <PlacesToVisit />
         <Outcomes />
         <Assessments />

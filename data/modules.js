@@ -1,67 +1,52 @@
 export const MODULE_DATA = [
   {
-    slug: "digital-toolkit",
-    id: "0",
-    title: "The Digital Toolkit",
-    subtitle: "Prompt Engineering, Analog vs Digital, and Multimeters",
-    tags: ["Fundamentals", "Multimeter"],
+    slug: "intro-arduino-ide",
+    id: "I",
+    title: "Introduction to Arduino IDE",
+    subtitle: "Understand what the Arduino IDE is, what it is used for, and how to navigate its interface",
+    tags: ["Arduino IDE", "Setup", "Fundamentals"],
     description:
-      "Prompt Engineering for hardware, understanding Analog vs Digital signals, and Multimeter fundamentals.",
+      "Understand what the Arduino IDE is, what it is used for, and how to navigate its interface.",
     sections: [
       {
-        heading: "What is a Multimeter?",
+        heading: "Part I. Installation of Arduino IDE version 2.x.x",
         content: [
-          "It is one tool that does three main jobs:",
-          "**Voltmeter (V):** Measures \"pressure.\" Is your 7.4V battery actually full?",
-          "**Ohmmeter (Ohms):** Measures \"resistance.\" Is your 10k resistor the right one?",
-          "**Continuity:** Measures \"connection.\" Is there a broken wire or a \"short\" in your breadboard?",
+          "**Procedures:**",
+          "1. Access the official Arduino website (https://www.arduino.cc/en/software/) and download the software installation package appropriate for your operating system (Windows or macOS).",
+          "2. Once installed, launch the application by Double Clicking the Arduino IDE icon.",
+          "3. Inspect the interface of the Arduino IDE.",
         ],
       },
       {
-        heading: "The Big Difference: Analog vs. Digital",
-        images: ["image22.png", "image18.png"],
-        table: {
-          headers: ["Feature", "Analog (Old School)", "Digital (Modern)"],
-          rows: [
-            [
-              "Reading it",
-              "You watch a needle move.",
-              "You read a number on a screen.",
-            ],
-            [
-              "Accuracy",
-              'Hard to be exact; you have to "guess" between lines.',
-              'Very exact; shows you "3.29V" clearly.',
-            ],
-            [
-              "Ease of Use",
-              'You must pick the right "range" or the needle might break.',
-              "Most are Auto-Ranging—the tool finds the range for you.",
-            ],
-            [
-              "Best For",
-              "Watching values that fluctuate rapidly (wobbling needle).",
-              "Everything else! Checking sensors, batteries, and code.",
-            ],
-          ],
-        },
-      },
-      {
-        heading: "What is HW-131?",
-        images: ["image2.png"],
+        heading: "a. Sketch Editor",
+        images: ["mod1-1.png"],
         content: [
-          "The HW-131 is a breadboard power regulator that sits directly on the power rails of your breadboard.",
-          "**Input:** You can power it via a 12V DC barrel jack or a USB cable.",
-          "**Output:** It has two independent sets of pins that can be set to 5V or 3.3V using yellow jumpers.",
-          "**Switch:** It has a physical ON/OFF button, which is much safer for participants than constantly unplugging wires.",
+          "The main text area where you write your code (called a **Sketch**).",
+          "Every sketch starts with two functions: **setup()** runs once when the board powers on, and **loop()** runs repeatedly after setup completes.",
         ],
       },
       {
-        heading: "How to Connect HW-131 for Your ESP32 Project",
+        heading: "b. Toolbar",
+        images: ["mod1-2.png"],
         content: [
-          "**Mounting:** Plug the module into the very end of your breadboard so the pins align with the + and - rails.",
-          "**Setting the Jumpers:** Set the Left Side jumper to 3.3V to power your ESP32 and LDR. Set the Right Side jumper to 5V if you need to power the L298N logic or the Ultrasonic sensor.",
-          "**Wiring the ESP32:** Connect the breadboard's (+) rail to the Vin or 3V3 pin of the ESP32. Connect the breadboard's (-) rail to a GND pin.",
+          "Contains primary tools to **Verify** (compile) your code and **Upload** it to the board.",
+          "The checkmark button compiles your sketch to check for errors, and the arrow button uploads the compiled code to the connected board.",
+        ],
+      },
+      {
+        heading: "c. Sidebar",
+        images: ["mod1-3.png"],
+        content: [
+          "Provides access to the **Boards Manager**, **Library Manager**, and **Debug** tools.",
+          "Use the Boards Manager to install board packages (e.g., ESP32 by Espressif Systems). The Library Manager lets you add pre-built libraries for sensors, displays, and communication protocols.",
+        ],
+      },
+      {
+        heading: "d. Output Console",
+        images: ["mod1-4.png"],
+        content: [
+          "Displays status messages, compilation errors, and memory usage details.",
+          "When you verify or upload a sketch, this panel shows the progress and any errors that need to be fixed before the code can run on your board.",
         ],
       },
     ],

@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { groupUpload } from "@/db/schema";
 import { uploadFile } from "@/lib/minio";
 import { eq, and, desc } from "drizzle-orm";
+import { MAX_UPLOAD_SIZE_BYTES, MAX_UPLOAD_SIZE_LABEL } from "@/src/constants/upload";
 
 export async function GET(request, { params }) {
   try {
@@ -53,13 +54,30 @@ export async function POST(request, { params }) {
 
     const { id } = await params;
     const formData = await request.formData();
-    const imageFile = formData.get("image");
+    const uploadedFile = formData.get("file");
     const moduleSlug = formData.get("moduleSlug");
     const description = formData.get("description");
 
-    if (!imageFile || !(imageFile instanceof File) || imageFile.size === 0) {
+    if (!uploadedFile || !(uploadedFile instanceof File) || uploadedFile.size === 0) {
       return NextResponse.json(
-        { error: "Image file is required" },
+        { error: "File is required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate file size (20MB)
+    if (uploadedFile.size > MAX_UPLOAD_SIZE_BYTES) {
+      return NextResponse.json(
+        { error: `File too large. Maximum size is ${MAX_UPLOAD_SIZE_LABEL}.` },
+        { status: 400 }
+      );
+    }
+
+    // Validate MIME type
+    const mimeType = uploadedFile.type || "";
+    if (!mimeType.startsWith("image/") && !mimeType.startsWith("video/")) {
+      return NextResponse.json(
+        { error: "Only image and video files are allowed." },
         { status: 400 }
       );
     }
@@ -71,9 +89,9 @@ export async function POST(request, { params }) {
       );
     }
 
-    const ext = imageFile.name.split(".").pop();
+    const ext = uploadedFile.name.split(".").pop();
     const fileName = `uploads/${id}/${moduleSlug}/${crypto.randomUUID()}.${ext}`;
-    const imageUrl = await uploadFile(imageFile, fileName);
+    const imageUrl = await uploadFile(uploadedFile, fileName);
 
     const [upload] = await db
       .insert(groupUpload)

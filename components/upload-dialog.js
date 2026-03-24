@@ -1,30 +1,45 @@
 "use client";
 
 import { useState } from "react";
+import {
+  MAX_UPLOAD_SIZE_BYTES,
+  MAX_UPLOAD_SIZE_LABEL,
+  ACCEPTED_FILE_TYPES,
+} from "@/src/constants/upload";
 
 export default function UploadDialog({ groupId, moduleSlug, moduleName, onUploaded }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [description, setDescription] = useState("");
-  const [imagePreview, setImagePreview] = useState(null);
-  const [imageFile, setImageFile] = useState(null);
+  const [filePreview, setFilePreview] = useState(null);
+  const [file, setFile] = useState(null);
+  const [fileType, setFileType] = useState(null); // "image" or "video"
+  const [error, setError] = useState("");
 
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+  const handleFileChange = (e) => {
+    const selected = e.target.files?.[0];
+    setError("");
+    if (!selected) return;
+
+    if (selected.size > MAX_UPLOAD_SIZE_BYTES) {
+      setError(`File too large. Maximum size is ${MAX_UPLOAD_SIZE_LABEL}.`);
+      e.target.value = "";
+      return;
     }
+
+    setFile(selected);
+    setFilePreview(URL.createObjectURL(selected));
+    setFileType(selected.type.startsWith("video") ? "video" : "image");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!imageFile) return;
+    if (!file) return;
 
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append("image", imageFile);
+      formData.append("file", file);
       formData.append("moduleSlug", moduleSlug);
       if (description.trim()) {
         formData.append("description", description.trim());
@@ -37,13 +52,19 @@ export default function UploadDialog({ groupId, moduleSlug, moduleName, onUpload
 
       if (res.ok) {
         setDescription("");
-        setImageFile(null);
-        setImagePreview(null);
+        setFile(null);
+        setFilePreview(null);
+        setFileType(null);
+        setError("");
         setOpen(false);
         onUploaded?.();
+      } else {
+        const data = await res.json();
+        setError(data.error || "Upload failed");
       }
-    } catch (error) {
-      console.error("Failed to upload:", error);
+    } catch (err) {
+      console.error("Failed to upload:", err);
+      setError("Upload failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -56,7 +77,7 @@ export default function UploadDialog({ groupId, moduleSlug, moduleName, onUpload
         onClick={() => setOpen(true)}
         type="button"
       >
-        📷 Upload Photo
+        Upload File
       </button>
     );
   }
@@ -77,21 +98,30 @@ export default function UploadDialog({ groupId, moduleSlug, moduleName, onUpload
 
         <form onSubmit={handleSubmit} className="dialog__form">
           <div className="form-field">
-            <label className="form-field__label" htmlFor="upload-image">
-              Photo
+            <label className="form-field__label" htmlFor="upload-file">
+              Photo / Video
+              <span className="form-field__hint">Max {MAX_UPLOAD_SIZE_LABEL}</span>
             </label>
             <input
-              id="upload-image"
+              id="upload-file"
               type="file"
               className="form-field__input"
-              accept="image/*"
-              onChange={handleImageChange}
+              accept={ACCEPTED_FILE_TYPES}
+              onChange={handleFileChange}
               required
             />
-            {imagePreview && (
+            {error && <p className="form-field__error">{error}</p>}
+            {filePreview && fileType === "image" && (
               <img
-                src={imagePreview}
+                src={filePreview}
                 alt="Preview"
+                className="form-field__preview"
+              />
+            )}
+            {filePreview && fileType === "video" && (
+              <video
+                src={filePreview}
+                controls
                 className="form-field__preview"
               />
             )}
@@ -122,7 +152,7 @@ export default function UploadDialog({ groupId, moduleSlug, moduleName, onUpload
             <button
               type="submit"
               className="btn btn--primary"
-              disabled={loading || !imageFile}
+              disabled={loading || !file}
             >
               {loading ? "Uploading..." : "Upload"}
             </button>

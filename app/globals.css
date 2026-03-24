@@ -3027,6 +3027,25 @@ a.module-card {
   margin-top: var(--space-sm);
 }
 
+video.form-field__preview {
+  object-fit: contain;
+}
+
+.form-field__error {
+  color: #d32f2f;
+  font-size: 0.8rem;
+  margin-top: var(--space-xs);
+}
+
+.form-field__hint {
+  display: inline;
+  font-weight: 500;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  opacity: 0.7;
+  margin-left: var(--space-sm);
+}
+
 @media (max-width: 768px) {
   .groups-page__title-row {
     flex-direction: column;

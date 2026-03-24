@@ -7,6 +7,7 @@ import LoginButton from "@/components/login-button";
 import UploadDialog from "@/components/upload-dialog";
 import { useSession } from "@/lib/auth-client";
 import { MODULE_DATA } from "@/data/modules";
+import { isVideoUrl } from "@/src/constants/upload";
 
 export default function GroupDetailPage({ params }) {
   const { id } = use(params);
@@ -336,11 +337,19 @@ export default function GroupDetailPage({ params }) {
                           {uploads.map((upload) => (
                             <div key={upload.id} className="group-upload-card">
                               <div className="group-upload-card__img-wrap">
-                                <img
-                                  src={upload.imageUrl}
-                                  alt={upload.description || "Module upload"}
-                                  className="group-upload-card__img"
-                                />
+                                {isVideoUrl(upload.imageUrl) ? (
+                                  <video
+                                    src={upload.imageUrl}
+                                    controls
+                                    className="group-upload-card__img"
+                                  />
+                                ) : (
+                                  <img
+                                    src={upload.imageUrl}
+                                    alt={upload.description || "Module upload"}
+                                    className="group-upload-card__img"
+                                  />
+                                )}
                                 {session?.user?.id === upload.uploadedById && (
                                   <button
                                     className="group-upload-card__delete"

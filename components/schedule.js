@@ -6,12 +6,12 @@ const SCHEDULE = [
   {
     day: "Day 1",
     date: "March 24",
-    weekday: "Monday",
+    weekday: "Tuesday",
     theme: "Foundations",
     items: [
       {
         time: "8:00 AM – 12:00 NN",
-        activity: "Arrival, Registration & Opening Preliminaries",
+        activity: "Arrival, Registration, and Billeting of the Participants",
         type: "ceremony",
       },
       {
@@ -21,12 +21,12 @@ const SCHEDULE = [
       },
       {
         time: "1:00 PM – 1:30 PM",
-        activity: "Expectation Setting & Participant Orientation",
+        activity: "Expectation Setting and Participant Orientation",
         type: "session",
       },
       {
         time: "1:30 PM – 3:00 PM",
-        activity: "Module 0 & I: The Digital Toolkit",
+        activity: "Module I: Introduction",
         detail: "Prompt Engineering for hardware, Analog vs Digital, Multimeters, IDE 2.x installation",
         type: "module",
       },
@@ -41,7 +41,7 @@ const SCHEDULE = [
   {
     day: "Day 2",
     date: "March 25",
-    weekday: "Tuesday",
+    weekday: "Wednesday",
     theme: "Sensors & IoT",
     items: [
       {
@@ -74,8 +74,8 @@ const SCHEDULE = [
       },
       {
         time: "3:30 PM – 5:00 PM",
-        activity: "Module IX: IoT Basics",
-        detail: "Setting up an ESP32 Wi-Fi Web Server to host sensor data",
+        activity: "Module VIII: The Drive System",
+        detail: "L298N Motor Driver assembly and dual motor execution",
         type: "module",
       },
     ],
@@ -83,7 +83,7 @@ const SCHEDULE = [
   {
     day: "Day 3",
     date: "March 26",
-    weekday: "Wednesday",
+    weekday: "Thursday",
     theme: "Motors & Alerts",
     items: [
       {
@@ -93,14 +93,14 @@ const SCHEDULE = [
       },
       {
         time: "8:15 AM – 11:00 AM",
-        activity: "Module VIII: The Drive System",
-        detail: "L298N Motor Driver assembly and dual motor execution",
+        activity: "Module IX: IoT Basics",
+        detail: "Setting up an ESP32 Wi-Fi Web Server to host sensor data",
         type: "module",
       },
       {
         time: "11:00 AM – 12:00 NN",
-        activity: "Module X: Critical Alerts",
-        detail: "Generating Google App Passwords for SMTP security",
+        activity: "Module X: Automated Alerts",
+        detail: "Coding the LDR-triggered Email Alerts via SMTP",
         type: "module",
       },
       {
@@ -109,13 +109,7 @@ const SCHEDULE = [
         type: "break",
       },
       {
-        time: "1:00 PM – 3:30 PM",
-        activity: "Module X (Cont.): Automated Alerts",
-        detail: "Coding the LDR-triggered Email Alerts via SMTP",
-        type: "module",
-      },
-      {
-        time: "3:30 PM – 5:00 PM",
+        time: "1:00 PM – 5:00 PM",
         activity: "Project Lab & Troubleshooting",
         detail: "Final system integration and code debugging for the presentation",
         type: "lab",
@@ -125,16 +119,16 @@ const SCHEDULE = [
   {
     day: "Day 4",
     date: "March 27",
-    weekday: "Thursday",
+    weekday: "Friday",
     theme: "Assessment & Closing",
     items: [
       {
-        time: "8:00 AM – 8:15 AM",
+        time: "8:00 AM – 8:30 AM",
         activity: "Recap of Day 3",
         type: "session",
       },
       {
-        time: "8:15 AM – 9:00 AM",
+        time: "8:30 AM – 9:00 AM",
         activity: "Post-Training Assessment",
         detail: "Final Technical Post-Test and Evaluation",
         type: "session",
@@ -154,12 +148,12 @@ const SCHEDULE = [
   },
 ];
 
-const TYPE_ICONS = {
-  module: "📘",
-  session: "📋",
-  ceremony: "🎓",
-  break: "☕",
-  lab: "🔬",
+const TYPE_LABELS = {
+  module: "Module",
+  session: "Session",
+  ceremony: "Event",
+  break: "Break",
+  lab: "Lab",
 };
 
 export default function Schedule() {
@@ -222,8 +216,8 @@ export default function Schedule() {
                 </div>
                 <div className="timeline-item__content">
                   <span className="timeline-item__time">
-                    <span className="timeline-item__icon">
-                      {TYPE_ICONS[item.type]}
+                    <span className="timeline-item__label">
+                      {TYPE_LABELS[item.type]}
                     </span>
                     {item.time}
                   </span>

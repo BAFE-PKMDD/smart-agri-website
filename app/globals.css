@@ -940,8 +940,16 @@ a.module-card {
   margin-bottom: 4px;
 }
 
-.timeline-item__icon {
-  font-size: 0.9rem;
+.timeline-item__label {
+  font-family: var(--font-heading);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background-color: var(--color-primary-ghost);
+  color: var(--color-primary);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
 }
 
 .timeline-item__activity {

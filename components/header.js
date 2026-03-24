@@ -12,6 +12,8 @@ const NAV_ITEMS = [
   { label: "Details", href: "#details" },
   { label: "Assessments", href: "#assessments" },
   { label: "Groups", href: "/groups", isPage: true },
+  { label: "References", href: "/references", isPage: true },
+  { label: "Speakers", href: "/speakers", isPage: true },
   { label: "Contact", href: "#contact" },
 ];
 

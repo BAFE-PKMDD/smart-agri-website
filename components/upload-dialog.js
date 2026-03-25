@@ -15,6 +15,7 @@ export default function UploadDialog({ groupId, moduleSlug, moduleName, onUpload
   const [file, setFile] = useState(null);
   const [fileType, setFileType] = useState(null); // "image" or "video"
   const [error, setError] = useState("");
+  const [progress, setProgress] = useState("");
 
   const handleFileChange = (e) => {
     const selected = e.target.files?.[0];
@@ -37,36 +38,76 @@ export default function UploadDialog({ groupId, moduleSlug, moduleName, onUpload
     if (!file) return;
 
     setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("moduleSlug", moduleSlug);
-      if (description.trim()) {
-        formData.append("description", description.trim());
-      }
+    setError("");
 
-      const res = await fetch(`/api/groups/${groupId}/uploads`, {
+    try {
+      // Step 1: Get presigned URL from our API
+      setProgress("Preparing upload...");
+      const presignRes = await fetch(`/api/groups/${groupId}/uploads/presign`, {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileName: file.name,
+          contentType: file.type,
+          fileSize: file.size,
+          moduleSlug,
+        }),
       });
 
-      if (res.ok) {
+      if (!presignRes.ok) {
+        const data = await presignRes.json();
+        setError(data.error || "Failed to prepare upload");
+        return;
+      }
+
+      const { presignedUrl, publicUrl } = await presignRes.json();
+
+      // Step 2: Upload file directly to MinIO via presigned URL
+      setProgress("Uploading file...");
+      const uploadRes = await fetch(presignedUrl, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      if (!uploadRes.ok) {
+        setError("Failed to upload file to storage. Please try again.");
+        return;
+      }
+
+      // Step 3: Save metadata to our database
+      setProgress("Saving...");
+      const saveRes = await fetch(`/api/groups/${groupId}/uploads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          moduleSlug,
+          imageUrl: publicUrl,
+          description: description.trim() || null,
+        }),
+      });
+
+      if (saveRes.ok) {
         setDescription("");
         setFile(null);
         setFilePreview(null);
         setFileType(null);
         setError("");
+        setProgress("");
         setOpen(false);
         onUploaded?.();
       } else {
-        const data = await res.json();
-        setError(data.error || "Upload failed");
+        const data = await saveRes.json();
+        setError(data.error || "Failed to save upload record");
       }
     } catch (err) {
       console.error("Failed to upload:", err);
       setError("Upload failed. Please try again.");
     } finally {
       setLoading(false);
+      setProgress("");
     }
   };
 
@@ -146,6 +187,7 @@ export default function UploadDialog({ groupId, moduleSlug, moduleName, onUpload
               type="button"
               className="btn btn--ghost"
               onClick={() => setOpen(false)}
+              disabled={loading}
             >
               Cancel
             </button>
@@ -154,7 +196,7 @@ export default function UploadDialog({ groupId, moduleSlug, moduleName, onUpload
               className="btn btn--primary"
               disabled={loading || !file}
             >
-              {loading ? "Uploading..." : "Upload"}
+              {loading ? progress || "Uploading..." : "Upload"}
             </button>
           </div>
         </form>

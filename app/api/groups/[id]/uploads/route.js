@@ -3,9 +3,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
 import { groupUpload } from "@/db/schema";
-import { uploadFile } from "@/lib/minio";
 import { eq, and, desc } from "drizzle-orm";
-import { MAX_UPLOAD_SIZE_BYTES, MAX_UPLOAD_SIZE_LABEL } from "@/src/constants/upload";
 
 export async function GET(request, { params }) {
   try {
@@ -42,6 +40,7 @@ export async function GET(request, { params }) {
   }
 }
 
+// Save upload metadata after file has been uploaded directly to MinIO
 export async function POST(request, { params }) {
   try {
     const session = await auth.api.getSession({
@@ -53,34 +52,8 @@ export async function POST(request, { params }) {
     }
 
     const { id } = await params;
-    const formData = await request.formData();
-    const uploadedFile = formData.get("file");
-    const moduleSlug = formData.get("moduleSlug");
-    const description = formData.get("description");
-
-    if (!uploadedFile || !(uploadedFile instanceof File) || uploadedFile.size === 0) {
-      return NextResponse.json(
-        { error: "File is required" },
-        { status: 400 }
-      );
-    }
-
-    // Validate file size (20MB)
-    if (uploadedFile.size > MAX_UPLOAD_SIZE_BYTES) {
-      return NextResponse.json(
-        { error: `File too large. Maximum size is ${MAX_UPLOAD_SIZE_LABEL}.` },
-        { status: 400 }
-      );
-    }
-
-    // Validate MIME type
-    const mimeType = uploadedFile.type || "";
-    if (!mimeType.startsWith("image/") && !mimeType.startsWith("video/")) {
-      return NextResponse.json(
-        { error: "Only image and video files are allowed." },
-        { status: 400 }
-      );
-    }
+    const body = await request.json();
+    const { moduleSlug, imageUrl, description } = body;
 
     if (!moduleSlug || typeof moduleSlug !== "string") {
       return NextResponse.json(
@@ -89,9 +62,12 @@ export async function POST(request, { params }) {
       );
     }
 
-    const ext = uploadedFile.name.split(".").pop();
-    const fileName = `uploads/${id}/${moduleSlug}/${crypto.randomUUID()}.${ext}`;
-    const imageUrl = await uploadFile(uploadedFile, fileName);
+    if (!imageUrl || typeof imageUrl !== "string") {
+      return NextResponse.json(
+        { error: "Image URL is required" },
+        { status: 400 }
+      );
+    }
 
     const [upload] = await db
       .insert(groupUpload)
@@ -106,9 +82,9 @@ export async function POST(request, { params }) {
 
     return NextResponse.json(upload, { status: 201 });
   } catch (error) {
-    console.error("Error uploading:", error);
+    console.error("Error saving upload:", error);
     return NextResponse.json(
-      { error: "Failed to upload" },
+      { error: "Failed to save upload" },
       { status: 500 }
     );
   }

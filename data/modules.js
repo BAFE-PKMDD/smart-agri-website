@@ -609,45 +609,57 @@ void loop() {
     subtitle: "ESP32 Wi-Fi Web Server Hosting Live Sensor Data",
     tags: ["ESP32", "Wi-Fi", "IoT"],
     description:
-      "Setting up an ESP32 Wi-Fi Web Server to host live sensor data accessible from any device on the network.",
+      "Transform your ESP32 into a local web server. Learn how to connect the board to your home network and host a webpage that allows you to control an LED and monitor real-time sensor data from any smartphone or computer connected to the same Wi-Fi.",
     sections: [
       {
         heading: "Part I. Understanding Wi-Fi Modes",
         content: [
           "The ESP32 can operate in two primary Wi-Fi modes:",
-          "- **Station Mode (STA):** The ESP32 connects to an existing Wi-Fi network (like your router). This is what we will use.",
-          "- **Access Point Mode (AP):** The ESP32 creates its own Wi-Fi network (like a hotspot).",
+          "- **Station Mode (STA):** The ESP32 connects to an existing Wi-Fi network (like your home router). This is what we will use.",
+          "- **Access Point Mode (AP):** The ESP32 creates its own Wi-Fi network (like a hotspot) that you can connect to directly.",
         ],
       },
       {
         heading: "Part II. Hardware Assembly",
         content: [
-          "We will use the LDR for monitoring and the internal Blue LED for control.",
-          "1. Set up the LDR voltage divider circuit as in Module IV.",
+          "Because we are adding a monitoring dashboard, we need a sensor to provide data. We will use the internal Blue LED for the control function and the LDR for the monitoring function.",
+          "**Procedures:**",
+          "1. Set up the LDR voltage divider circuit as you did in Module IV.",
           "2. Ensure the LDR junction is connected to **GPIO 34**.",
         ],
       },
       {
-        heading: "Part III. The Web Server Code",
+        heading: "Part III. Setting Up the Web Server Code",
         content: [
-          "We use the built-in `WiFi.h` library. The dashboard auto-refreshes every 5 seconds using an HTML meta tag.",
-          "**Replace YOUR_SSID and YOUR_PASSWORD** with your actual Wi-Fi credentials.",
+          "To create a web server, we use the built-in `WiFi.h` library. We will create a simple HTML interface with a live data dashboard and two buttons: one to turn the LED ON and one to turn it OFF.",
+          "To make the dashboard update automatically, we include a `<meta http-equiv='refresh' content='5'>` HTML tag so the page refreshes every 5 seconds.",
+          "**Procedures:**",
+          "1. Open a new sketch.",
+          "2. Replace `YOUR_SSID` and `YOUR_PASSWORD` with your actual Wi-Fi credentials.",
+          "3. Copy and paste the code below:",
         ],
         code: `#include <WiFi.h>
 
+// 1. Replace with your network credentials
 const char* ssid     = "YOUR_SSID";
 const char* password = "YOUR_PASSWORD";
 
+// 2. Set web server port number to 80
 WiFiServer server(80);
+
+// 3. Variable to store the HTTP request
 String header;
-const int outputPin = 2;  // Internal Blue LED
-const int ldrPin = 34;    // LDR Sensor pin
+
+// 4. Assign output and input pins
+const int outputPin = 2; // Using the internal Blue LED
+const int ldrPin = 34;   // LDR Sensor pin for the dashboard
 
 void setup() {
   Serial.begin(115200);
   pinMode(outputPin, OUTPUT);
   digitalWrite(outputPin, LOW);
 
+  // Connect to Wi-Fi network
   Serial.print("Connecting to ");
   Serial.println(ssid);
   WiFi.begin(ssid, password);
@@ -655,38 +667,102 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("\\nWiFi connected.");
-  Serial.print("IP address: ");
+
+  // Print local IP address and start web server
+  Serial.println("");
+  Serial.println("WiFi connected.");
+  Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
   server.begin();
 }
 
 void loop() {
-  WiFiClient client = server.available();
-  if (client) {
-    // Handle HTTP requests, serve HTML dashboard
-    // with LED control buttons and live LDR readings
-    // (Full code in the training materials)
+  WiFiClient client = server.available();   // Listen for incoming clients
+
+  if (client) {                             // If a new client connects,
+    Serial.println("New Client.");
+    String currentLine = "";
+    while (client.connected()) {
+      if (client.available()) {
+        char c = client.read();
+        header += c;
+        if (c == '\\n') {
+          if (currentLine.length() == 0) {
+            // HTTP headers always start with a response code
+            client.println("HTTP/1.1 200 OK");
+            client.println("Content-type:text/html");
+            client.println("Connection: close");
+            client.println();
+            
+            // 5. Check which button was pressed
+            if (header.indexOf("GET /LED/on") >= 0) {
+              digitalWrite(outputPin, HIGH);
+            } else if (header.indexOf("GET /LED/off") >= 0) {
+              digitalWrite(outputPin, LOW);
+            }
+            
+            // 6. Read Sensor Data
+            int currentLightLevel = analogRead(ldrPin);
+
+            // 7. Display the HTML web page
+            client.println("<!DOCTYPE html><html>");
+            client.println("<head><meta name=\\"viewport\\" content=\\"width=device-width, initial-scale=1\\">");
+            
+            // This line automatically refreshes the webpage every 5 seconds to update the sensor reading
+            client.println("<meta http-equiv=\\"refresh\\" content=\\"5\\">");
+            
+            client.println("<style>html { font-family: Helvetica; text-align: center;}");
+            client.println(".button { background-color: #4CAF50; border: none; color: white; padding: 16px 40px;");
+            client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;}</style></head>");
+            
+            client.println("<body><h1>Smart Agri Dashboard</h1>");
+            
+            // Inject the sensor data into the HTML
+            client.println("<h2>Environment Monitor</h2>");
+            client.print("<p style=\\"font-size: 24px;\\">Current Light Level: <strong>");
+            client.print(currentLightLevel);
+            client.println("</strong> / 4095</p><hr>");
+
+            // Inject the Control Buttons
+            client.println("<h2>Equipment Control</h2>");
+            client.println("<p><a href=\\"/LED/on\\"><button class=\\"button\\">ON</button></a></p>");
+            client.println("<p><a href=\\"/LED/off\\"><button class=\\"button\\" style=\\"background-color:red\\">OFF</button></a></p>");
+            client.println("</body></html>");
+            
+            client.println(); // The HTTP response ends with another blank line
+            break;
+          } else {
+            currentLine = "";
+          }
+        } else if (c != '\\r') {
+          currentLine += c;
+        }
+      }
+    }
+    header = "";
+    client.stop(); // Close the connection
+    Serial.println("Client disconnected.");
   }
 }`,
       },
       {
-        heading: "Part IV. Accessing the Dashboard",
+        heading: "Part IV. Execution and Accessing the Server",
         content: [
+          "**Procedures:**",
           "1. Upload the code to your ESP32.",
           "2. Open the Serial Monitor (115200 baud).",
           '3. Wait for the message: "IP address: 192.168.x.x". Write this number down.',
-          "4. Open a web browser on your phone or laptop (same Wi-Fi).",
+          "4. Open a web browser on your phone or laptop (ensure it is on the same Wi-Fi).",
           "5. Type the IP address into the URL bar and hit Enter.",
-          "6. Cover the LDR with your hand to see the dashboard values change.",
+          "6. Cover the LDR with your hand; you will see the number on the dashboard drop the next time the page auto-refreshes.",
         ],
       },
       {
         heading: "Part V. Troubleshooting",
         content: [
-          "- **Serial Monitor shows dots:** SSID or Password might be wrong.",
-          "- **Webpage won't load:** Ensure phone/laptop is on the same Wi-Fi network.",
-          "- **IP Address is 0.0.0.0:** Board didn't get an IP. Reset the ESP32 with the EN button.",
+          "- **Serial Monitor shows only dots (......):** Your SSID or Password might be wrong, or your router is blocking the connection.",
+          "- **Webpage won't load:** Make sure your phone/laptop is on the exact same Wi-Fi network as the ESP32.",
+          "- **IP Address is 0.0.0.0:** The board didn't get an IP from the router. Try resetting the ESP32 using the EN button.",
         ],
       },
     ],
@@ -698,76 +774,101 @@ void loop() {
     subtitle: "ESP32 Email Notifications When Sensor Thresholds are Exceeded",
     tags: ["SMTP", "Email", "Alerts"],
     description:
-      "Programming the ESP32 to send secure email notifications when sensor thresholds are exceeded using Google SMTP.",
+      "Program the ESP32 to act as an SMTP (Simple Mail Transfer Protocol) client that automatically sends a secure email notification when a hardware sensor (LDR) detects a drastic change in ambient light.",
     sections: [
       {
         heading: "Part I. Generating a Google App Password",
         content: [
-          "1. Log in to your Google account → **Manage your Google Account**.",
-          "2. Go to the **Security** tab.",
-          "3. Ensure **2-Step Verification** is enabled.",
-          "4. Under 2-Step Verification, scroll to **App passwords**.",
-          "5. Provide a name (e.g., \"ESP32_Instrumentation_Node\") and click **Create**.",
-          "6. Copy the 16-character passcode.",
+          "To allow the ESP32 to send emails through Google's servers securely without exposing your main password, we must generate a dedicated App Password.",
+          "**Procedures:**",
+          "1. Log in to the Google account you wish to send emails from and navigate to **Manage your Google Account**.",
+          "2. Go to the **Security** tab on the left sidebar.",
+          "3. Ensure that **2-Step Verification (2SV)** is enabled.",
+          "4. Under the \"How you sign in to Google\" section, select **2-Step Verification** or access the link: https://myaccount.google.com/signinoptions/two-step-verification",
+          "5. Scroll to the bottom of the page and select **App passwords** or access the link: https://myaccount.google.com/apppasswords",
+          "6. Provide a custom name for the application (e.g., \"ESP32_Instrumentation_Node\") and click **Create**.",
+          "7. A 16-character passcode will appear in a yellow box. Copy this exact 16-character string. You will paste this into your Arduino code.",
         ],
       },
       {
-        heading: "Part II. Hardware Setup",
+        heading: "Part II. Assembling the LDR Hardware Circuit",
         content: [
-          "Follow the LDR wiring from Module IV.",
+          "Follow the instruction in Module IV (LDR).",
         ],
       },
       {
-        heading: "Part III. Installing the Library",
+        heading: "Part III. Installing the Required Library",
         content: [
+          "Standard Arduino libraries cannot handle the complex SSL/TLS encryption required by Google's SMTP servers. We will use a specialized library.",
+          "**Procedures:**",
           "1. Open the Arduino IDE.",
-          "2. Open the **Library Manager**.",
-          '3. Search for **"ESP Mail Client"**.',
+          "2. Open the **Library Manager** from the Sidebar (or navigate to Sketch > Include Library > Manage Libraries).",
+          '3. In the search bar, type **ESP Mail Client**.',
           "4. Locate the library authored by **Mobizt** and click Install.",
         ],
       },
       {
-        heading: "Part IV. The Code",
+        heading: "Part IV. The Sketch (Code)",
+        content: [
+          "**Procedures:**",
+          "1. Copy the code below into your Sketch Editor.",
+          "2. Replace `YOUR_WIFI_SSID` and `YOUR_WIFI_PASSWORD` with your local network credentials.",
+          "3. Replace `SENDER_EMAIL@domain.com` and the `APP_PASSWORD` with the credentials generated in Part I.",
+          "4. Replace `RECIPIENT_EMAIL@domain.com` with the address where you want to receive the alert.",
+        ],
         code: `#include <Arduino.h>
 #include <WiFi.h>
 #include <ESP_Mail_Client.h>
 
 #define WIFI_SSID "YOUR_WIFI_SSID"
 #define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
-#define SMTP_HOST "smtp.gmail.com"
-#define SMTP_PORT 465
 
+#define SMTP_HOST "smtp.gmail.com"
+#define SMTP_PORT 465 // Secure SSL/TLS port
+
+// The email account sending the alert
 #define AUTHOR_EMAIL "SENDER_EMAIL@domain.com"
 #define AUTHOR_PASSWORD "YOUR_16_CHAR_APP_PASSWORD"
+
+// The email account receiving the alert
 #define RECIPIENT_EMAIL "RECIPIENT_EMAIL@domain.com"
 
 SMTPSession smtp;
-const int ldrPin = 34;
+const int ldrPin = 34; // Analog pin connected to the LDR voltage divider
 bool alertSent = false;
 
 void setup() {
   Serial.begin(115200);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  
+  Serial.print("Connecting to Wi-Fi");
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
     delay(300);
   }
   Serial.println("\\nConnected with IP: ");
   Serial.println(WiFi.localIP());
+
+  // Enable debugging to see the SMTP communication in the Serial Monitor
   smtp.debug(1);
 }
 
 void loop() {
   int ldrValue = analogRead(ldrPin);
+  
+  // Trigger threshold: If exposed to bright light
   if (ldrValue > 3000 && !alertSent) {
     Serial.println("High light threshold exceeded! Sending alert...");
     sendEmailAlert(ldrValue);
-    alertSent = true;
+    alertSent = true; // Set flag so it doesn't spam your inbox
   }
+  
+  // Reset the flag once the enclosure is closed / it gets dark again
   if (ldrValue < 2000) {
     alertSent = false;
   }
-  delay(1000);
+  
+  delay(1000); 
 }
 
 void sendEmailAlert(int currentReading) {
@@ -776,6 +877,7 @@ void sendEmailAlert(int currentReading) {
   session.server.port = SMTP_PORT;
   session.login.email = AUTHOR_EMAIL;
   session.login.password = AUTHOR_PASSWORD;
+  session.login.user_domain = "";
 
   SMTP_Message message;
   message.sender.name = "ESP32 Instrumentation Node";
@@ -783,9 +885,11 @@ void sendEmailAlert(int currentReading) {
   message.subject = "CRITICAL: Light Threshold Alert";
   message.addRecipient("Admin", RECIPIENT_EMAIL);
 
+  // Construct the email body
   String emailBody = "Warning! The instrumentation sensor detected a high light event.\\n\\n";
   emailBody += "Current LDR Reading: " + String(currentReading) + " / 4095\\n";
   emailBody += "Please check the equipment immediately.";
+  
   message.text.content = emailBody.c_str();
 
   if (!smtp.connect(&session)) return;
@@ -797,12 +901,25 @@ void sendEmailAlert(int currentReading) {
 }`,
       },
       {
-        heading: "Part V. Troubleshooting",
+        heading: "Part V. Execution and Accessing the Results",
         content: [
-          "- **LDR Value is Always 0 or 4095:** Check wiring. Ensure the 10k resistor is grounded properly.",
-          "- **Error 535 (Authentication Failed):** Double-check App Password has no spaces.",
-          "- **Failed to connect to server:** Check if firewall blocks port 465.",
-          "- **Serial Monitor shows dots:** Check SSID/Password and Wi-Fi range.",
+          "**Procedures:**",
+          "1. Upload the code to your ESP32.",
+          "2. Open the Serial Monitor (115200 baud).",
+          "3. Wait for the message confirming the Wi-Fi connection.",
+          "4. **Trigger the sensor:** Shine a bright flashlight directly onto the LDR so the analog reading spikes above 3000.",
+          "5. Watch the Serial Monitor. You will see the ESP32 negotiate the SSL handshake with Google's servers.",
+          '6. Look for the "Email sent successfully!" message. Check your receiving inbox to view the automated alert.',
+          "7. Cover the LDR with your hand to drop the reading below 2000, resetting the system for the next alert.",
+        ],
+      },
+      {
+        heading: "Part VI. Troubleshooting",
+        content: [
+          "- **LDR Value is Always 0 or 4095:** Check your wiring. Ensure the 10k resistor is properly grounded and the junction wire is securely connected to Pin 34.",
+          "- **Error 535 (Authentication Failed):** Double-check that your 16-character App Password has no spaces in the code. Ensure you are using the exact email address associated with that App Password.",
+          "- **Failed to connect to server / Connection Refused:** Check if your local network or firewall is blocking outbound traffic on port 465.",
+          "- **Serial Monitor shows only dots (......):** Your SSID or Password might be wrong, or your access point is offline. Ensure the ESP32 is within range of your Wi-Fi router.",
         ],
       },
     ],

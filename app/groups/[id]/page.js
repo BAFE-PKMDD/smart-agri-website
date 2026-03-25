@@ -8,6 +8,7 @@ import UploadDialog from "@/components/upload-dialog";
 import { useSession } from "@/lib/auth-client";
 import { MODULE_DATA } from "@/data/modules";
 import { isVideoUrl } from "@/src/constants/upload";
+import MediaViewer from "@/components/media-viewer";
 
 export default function GroupDetailPage({ params }) {
   const { id } = use(params);
@@ -22,6 +23,7 @@ export default function GroupDetailPage({ params }) {
   const [description, setDescription] = useState("");
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [viewingMedia, setViewingMedia] = useState(null);
 
   const fetchGroup = useCallback(async () => {
     try {
@@ -336,12 +338,17 @@ export default function GroupDetailPage({ params }) {
                         <div className="group-uploads-grid">
                           {uploads.map((upload) => (
                             <div key={upload.id} className="group-upload-card">
-                              <div className="group-upload-card__img-wrap">
+                              <div
+                                className="group-upload-card__img-wrap"
+                                onClick={() => setViewingMedia({ url: upload.imageUrl, alt: upload.description })}
+                                role="button"
+                                tabIndex={0}
+                              >
                                 {isVideoUrl(upload.imageUrl) ? (
                                   <video
                                     src={upload.imageUrl}
-                                    controls
                                     className="group-upload-card__img"
+                                    muted
                                   />
                                 ) : (
                                   <img
@@ -389,6 +396,14 @@ export default function GroupDetailPage({ params }) {
           </div>
         </div>
       </main>
+
+      {viewingMedia && (
+        <MediaViewer
+          url={viewingMedia.url}
+          alt={viewingMedia.alt}
+          onClose={() => setViewingMedia(null)}
+        />
+      )}
     </div>
   );
 }

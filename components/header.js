@@ -127,7 +127,7 @@ export default function Header() {
             BAFE Smart Agriculture
             <span>Instrumentation &amp; Electronics</span>
           </div>
-          <span className="header__version">v1.2</span>
+          <span className="header__version">v1.3</span>
         </a>
 
         <nav className={`nav ${menuOpen ? "nav--open" : ""}`} id="nav-menu">

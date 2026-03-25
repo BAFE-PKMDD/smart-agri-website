@@ -9,6 +9,7 @@ import { useSession } from "@/lib/auth-client";
 import { MODULE_DATA } from "@/data/modules";
 import { isVideoUrl } from "@/src/constants/upload";
 import MediaViewer from "@/components/media-viewer";
+import LoadingScreen from "@/components/loading-screen";
 
 export default function GroupDetailPage({ params }) {
   const { id } = use(params);
@@ -122,7 +123,7 @@ export default function GroupDetailPage({ params }) {
     return (
       <div className="groups-page">
         <div className="container">
-          <div className="groups-page__loading">Loading group...</div>
+          <LoadingScreen message="Loading group..." />
         </div>
       </div>
     );

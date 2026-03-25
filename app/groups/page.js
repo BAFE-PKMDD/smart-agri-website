@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import LoginButton from "@/components/login-button";
 import CreateGroupDialog from "@/components/create-group-dialog";
+import LoadingScreen from "@/components/loading-screen";
 import { useSession } from "@/lib/auth-client";
 
 export default function GroupsPage() {
@@ -62,7 +63,7 @@ export default function GroupsPage() {
           </div>
 
           {loading ? (
-            <div className="groups-page__loading">Loading groups...</div>
+            <LoadingScreen message="Loading groups..." />
           ) : groups.length === 0 ? (
             <div className="groups-page__empty">
               <p>No groups yet. {session?.user ? "Create the first one!" : "Sign in to create a group."}</p>

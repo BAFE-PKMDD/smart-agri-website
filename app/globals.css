@@ -2172,6 +2172,99 @@ a.module-card {
   font-size: 0.95rem;
 }
 
+/* Premium Loading Screen */
+.loading-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3xl) var(--space-xl);
+  min-height: 280px;
+}
+
+.loading-screen__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  animation: loadingFadeIn 0.4s ease;
+}
+
+@keyframes loadingFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.loading-screen__spinner {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-screen__ring {
+  position: absolute;
+  inset: 0;
+  border: 2px solid transparent;
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: loadingRingSpin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+
+.loading-screen__ring--delayed {
+  inset: 6px;
+  border-top-color: transparent;
+  border-right-color: var(--color-primary-light);
+  animation-delay: -0.3s;
+  animation-duration: 1.6s;
+}
+
+@keyframes loadingRingSpin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-screen__icon {
+  color: var(--color-primary);
+  animation: loadingPulse 2s ease-in-out infinite;
+}
+
+@keyframes loadingPulse {
+  0%, 100% { opacity: 0.5; transform: scale(0.92); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+.loading-screen__text {
+  font-family: var(--font-heading);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.loading-screen__bar {
+  width: 120px;
+  height: 3px;
+  background-color: var(--color-border-light);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.loading-screen__bar-fill {
+  width: 40%;
+  height: 100%;
+  background-color: var(--color-primary);
+  border-radius: 3px;
+  animation: loadingBarSlide 1.4s ease-in-out infinite;
+}
+
+@keyframes loadingBarSlide {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(200%); }
+  100% { transform: translateX(-100%); }
+}
+
 /* Groups Grid */
 .groups-grid {
   display: grid;

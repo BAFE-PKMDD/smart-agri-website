@@ -810,7 +810,7 @@ void sendEmailAlert(int currentReading) {
   {
     slug: "hw-131-power-supply",
     id: "★",
-    title: "HW-131 Power Supply",
+    title: "Final Output",
     subtitle: "Breadboard Power Regulation for ESP32 Projects",
     tags: ["Power", "HW-131", "Safety"],
     description:

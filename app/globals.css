@@ -3193,12 +3193,39 @@ video.group-upload-card__img {
   to { opacity: 1; }
 }
 
-.media-viewer__close {
+.media-viewer__actions {
   position: absolute;
   top: var(--space-lg);
   right: var(--space-lg);
+  display: flex;
+  gap: var(--space-md);
+  z-index: 10;
+}
+
+.media-viewer__btn {
   width: 44px;
   height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.12);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.media-viewer__btn:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.media-viewer__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 50px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3211,14 +3238,23 @@ video.group-upload-card__img {
   z-index: 10;
 }
 
-.media-viewer__close:hover {
+.media-viewer__nav:hover {
   background-color: rgba(255, 255, 255, 0.25);
+}
+
+.media-viewer__nav--prev {
+  left: var(--space-lg);
+}
+
+.media-viewer__nav--next {
+  right: var(--space-lg);
 }
 
 .media-viewer__content {
   max-width: 90vw;
   max-height: 85vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   animation: mediaViewerScaleIn 0.25s ease;
@@ -3227,6 +3263,13 @@ video.group-upload-card__img {
 @keyframes mediaViewerScaleIn {
   from { transform: scale(0.92); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
+}
+
+.media-viewer__img-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
 }
 
 .media-viewer__media {
@@ -3238,6 +3281,16 @@ video.group-upload-card__img {
 
 video.media-viewer__media {
   background-color: #000;
+}
+
+.media-viewer__caption {
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  max-width: 90vw;
+  text-align: center;
 }
 
 /* =========================================

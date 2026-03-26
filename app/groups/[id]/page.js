@@ -341,7 +341,7 @@ export default function GroupDetailPage({ params }) {
                             <div key={upload.id} className="group-upload-card">
                               <div
                                 className="group-upload-card__img-wrap"
-                                onClick={() => setViewingMedia({ url: upload.imageUrl, alt: upload.description })}
+                                onClick={() => setViewingMedia({ list: uploads.map(u => ({ url: u.imageUrl, alt: u.description })), index: uploads.findIndex(u => u.id === upload.id) })}
                                 role="button"
                                 tabIndex={0}
                               >
@@ -400,8 +400,8 @@ export default function GroupDetailPage({ params }) {
 
       {viewingMedia && (
         <MediaViewer
-          url={viewingMedia.url}
-          alt={viewingMedia.alt}
+          mediaList={viewingMedia.list}
+          initialIndex={viewingMedia.index}
           onClose={() => setViewingMedia(null)}
         />
       )}

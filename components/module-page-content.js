@@ -3,6 +3,20 @@
 import Image from "next/image";
 import Link from "next/link";
 
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function formatText(text) {
+  return text
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/`([^`]+)`/g, (_, code) => `<code>${escapeHtml(code)}</code>`);
+}
+
 export default function ModulePageContent({ module: mod, allModules }) {
   const currentIndex = allModules.findIndex((m) => m.slug === mod.slug);
   const prevModule = currentIndex > 0 ? allModules[currentIndex - 1] : null;
@@ -159,7 +173,11 @@ export default function ModulePageContent({ module: mod, allModules }) {
                       </button>
                     </div>
                     <pre>
-                      <code>{section.code}</code>
+                      <code
+                        dangerouslySetInnerHTML={{
+                          __html: escapeHtml(section.code),
+                        }}
+                      />
                     </pre>
                   </div>
                 )}
@@ -202,8 +220,3 @@ export default function ModulePageContent({ module: mod, allModules }) {
   );
 }
 
-function formatText(text) {
-  return text
-    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-    .replace(/`([^`]+)`/g, "<code>$1</code>");
-}
